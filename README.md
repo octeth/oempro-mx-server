@@ -11,6 +11,10 @@ This module contains;
 
 ## Installation Instructions
 
+Copy `.env_example` to `.env` and set the configuration. 
+
+Then run:
+
 ```shell
 make build
 make run
