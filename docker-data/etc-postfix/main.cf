@@ -49,3 +49,4 @@ recipient_delimiter = +
 inet_interfaces = all
 inet_protocols = all
 maillog_file = /var/log/maillog
+strict_mailbox_ownership = no

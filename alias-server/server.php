@@ -15,7 +15,7 @@ $socket->on('connection', function (React\Socket\ConnectionInterface $connection
         }
 
         if (preg_match('/^tcp:\/\/127.0.0.1/i', $connection->getRemoteAddress()) > 0) {
-            $connection->write("200 root\n");
+            $connection->write("200 catchall\n");
         } else {
             $connection->end();
         }
