@@ -46,11 +46,3 @@ When an async bounce occurs, the recipient MX server sends a delivery status not
 
 ...
 
-## To Do
-
-- [ ] Setup a web mail browser (roundcube, etc.)
-- [ ] Turn this into a package and make it configurable
-- [ ] Push to the Docker hub as a custom image
-- [ ] Integrate alias server to Oempro
-- [ ] Instead of volume mount of the alias server, add it to the container
-- [ ] TLS support for both Postfix and Dovecot
