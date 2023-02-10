@@ -42,6 +42,18 @@ When an async bounce occurs, the recipient MX server sends a delivery status not
 3. The received email will be stored inside `catchall` user mailbox file.
 4. Oempro will connect to Dovecot, authenticate as `catchall` user and fetch emails from the mailbox for bounce processing.
 
+## Directory Structure
+
+```
+.
+├── alias-server           # The PHP script to get the MAIL-FROM domain from Postfix and validate on Oempro
+├── docker-data            # Dovecot, Postfix, Supervisor configuration, Mailbox directory
+├── Dockerfile             # The Dockerfile for building the image required to run the container
+├── Makefile               # Build, run, stop, etc.
+├── entrypoint.sh          # Entrypoint file to execute when the container is spinned up.
+└── README.md
+```
+
 ## Oempro Integration Instructions
 
 ...
