@@ -19,9 +19,10 @@ run:
 	-p 25:25 \
 	-h oempro-mx-server \
 	--name oempro-mx-server oempro-mx-server
+
 	docker run -d -it --rm \
 	-e ROUNDCUBEMAIL_DEFAULT_HOST=host.docker.internal \
-       	-e ROUNDCUBEMAIL_SMTP_SERVER=host.docker.internal \
+    -e ROUNDCUBEMAIL_SMTP_SERVER=host.docker.internal \
 	-p 8000:80 \
 	--add-host=host.docker.internal:host-gateway \
 	-h oempro-roundcube-server \

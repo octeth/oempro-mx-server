@@ -42,6 +42,94 @@ When an async bounce occurs, the recipient MX server sends a delivery status not
 3. The received email will be stored inside `catchall` user mailbox file.
 4. Oempro will connect to Dovecot, authenticate as `catchall` user and fetch emails from the mailbox for bounce processing.
 
+## Accessing the IMAP mailbox
+
+You can access the IMAP mailbox by any third party IMAP email client.
+
+The username is `catchall` and the password (`catchall_password`) written in the `.env` file. 
+
+In addition to this, you can also use the built-in RoundCube Email Client to access the mailbox.
+
+Simply visit `http://<server_ip_address>:8000` on your web browser. Enter the `catchall` username and the password written in the `.env` file.
+
+## How to enable TLS
+
+First, edit `docker-data/etc-postfix/main.cf` file:
+
+If you want to enforce TLS connections, set `smtpd_tls_security_level` to `encrypt`. Otherwise, set it to `may`.
+
+Run these commands:
+
+```shell
+docker exec -ti oempro-mx-server bash
+cd /tmp/
+mkdir ssl
+cd ssl
+apt install wget
+apt install certbot
+wget https://github.com/joohoi/acme-dns-certbot-joohoi/raw/master/acme-dns-auth.py .
+chmod +x acme-dns-auth.py
+apt install nano
+nano acme-dns-auth.py
+```
+
+Change `#!/usr/bin/env python` to `#!/usr/bin/env python3`. Save and exit the file.
+
+Run the following command to request SSL certificate using Let's Encrypt. Make sure to replace `mx.yourdomain.com` with your MX server domain name.
+
+```shell
+certbot certonly --manual --manual-auth-hook ./acme-dns-auth.py --preferred-challenges dns --debug-challenges -d mx.yourdomain.com
+```
+
+Certbot will ask you to set a CNAME record on your MX domain to validate. Once your MX domain is validated, Certbot will save your SSL certificate files and display you the path.
+
+Example:
+```shell
+Certificate is saved at: /etc/letsencrypt/live/mx.yourdomain.com/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/mx.yourdomain.com/privkey.pem
+```
+
+Copy these two files to `/etc/postfix/ssl/` directory:
+
+```shell
+cp /etc/letsencrypt/live/mx.yourdomain.com/fullchain.pem /etc/postfix/ssl/
+cp /etc/letsencrypt/live/mx.yourdomain.com/privkey.pem /etc/postfix/ssl/
+```
+
+Edit `docker-data/etc-postfix/main.cf` file and update these variables:
+
+```shell
+smtpd_tls_cert_file=/etc/postfix/ssl/fullchain.pem
+smtpd_tls_key_file=/etc/postfix/ssl/privkey.pem
+```
+
+Now restart Docker containers:
+
+```shell
+make kill
+make run
+```
+
+In order to test and validate TLS, connect to your MX server by running this command:
+
+```shell
+openssl s_client -quiet -starttls smtp -connect locahost:25
+```
+
+and you should see the TLS validation in the beginning:
+
+```text
+depth=2 C = US, O = Internet Security Research Group, CN = ISRG Root X1
+verify return:1
+depth=1 C = US, O = Let's Encrypt, CN = R3
+verify return:1
+depth=0 CN = mx.yourdomain.com
+verify return:1
+250 CHUNKING
+```
+
+That's it.
+
 ## Directory Structure
 
 ```
