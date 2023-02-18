@@ -180,14 +180,10 @@ That's it.
 ```shell
 make build
 make run
-docker commit -m 'Deploy commit' -a "Cem Hurturk" oempro-mx-server octeth/octeth_mx_server:v1.0.0
-docker login -u cemhurturk
+docker commit -m 'Deploy commit' -a "Your Name" oempro-mx-server octeth/octeth_mx_server:v1.0.0
+docker login -u <docker-user-name>
 docker push octeth/octeth_mx_server:v1.0.0
 ```
-
-> After `docker login`, enter the password you have set. [Check this kb article](https://www.notion.so/chmyos/Updating-Oempro-Docker-Container-cd62f83e5d054969bae57a51f25b0e91?pvs=4) for the password.
-
-
 
 ## Directory Structure
 
