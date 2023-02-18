@@ -56,7 +56,10 @@ Let's assume `192.168.0.100` is your server IP address and you will use `mx.mydo
 
 ## Local Development Installation Instructions
 
-Copy `.env_example` to `.env` and set the configuration. 
+Copy `.env_example` to `.env` and set the configuration. There are two `.env` files;
+
+- `/opt/oempro-mx-server/.env`
+- `/opt/oempro-mx-server/alias-server/.env`
 
 Then run:
 
@@ -196,8 +199,3 @@ docker push octeth/octeth_mx_server:v1.0.0
 ├── entrypoint.sh          # Entrypoint file to execute when the container is spinned up.
 └── README.md
 ```
-
-## Oempro Integration Instructions
-
-...
-
