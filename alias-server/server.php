@@ -2,32 +2,100 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-$socket = new React\Socket\SocketServer('127.0.0.1:8000', []);
+// Configuration class
+class Config
+{
+    public static $oemproUrl = null;
+    public static $oemproAdminApiKey = null;
+    public static $aliasUsername = 'catchall';
+}
 
-$socket->on('connection', function (React\Socket\ConnectionInterface $connection) {
-    $connection->on('data', function($chunk) use ($connection) {
-        $targetEmailDomain = preg_replace('/^get /i', '', trim($chunk));
+// Server class
+class Server
+{
+    public function __construct()
+    {
+    }
 
-        // TODO: Check if it's allowed to accept the email
-        if ($targetEmailDomain != 'c.com' && preg_match('/@c.com/i', $targetEmailDomain) == 0) {
-            $connection->write("500 Email address does not exist\n");
-            // $connection->write("400 Not Allowed\n");
+    public function initConfig()
+    {
+        $iniConfig = parse_ini_file(__DIR__ . '/.env');
+
+        if (isset($iniConfig['oempro_url'])) {
+            Config::$oemproUrl = $iniConfig['oempro_url'];
         }
 
-        if (preg_match('/^tcp:\/\/127.0.0.1/i', $connection->getRemoteAddress()) > 0) {
-            $connection->write("200 catchall\n");
-        } else {
-            $connection->end();
+        if (isset($iniConfig['oempro_admin_api_key'])) {
+            Config::$oemproAdminApiKey = $iniConfig['oempro_admin_api_key'];
         }
-    });
+    }
 
-    $connection->on('end', function() {});
-    $connection->on('error', function() {});
-    $connection->on('close', function() {});
-});
+    public function run()
+    {
+        // Configuration initialization
+        $this->initConfig();;
 
-$socket->on('error', function (Exception $e) {
-    echo 'Error: ' . $e->getMessage() . PHP_EOL;
-});
+        // Set up the server
+        $socket = new React\Socket\SocketServer('127.0.0.1:8000', []);
 
-echo 'Listening on ' . $socket->getAddress() . PHP_EOL;
+        // Event: Connection is made
+        $socket->on('connection', function (React\Socket\ConnectionInterface $connection) {
+            // Event: Data is received
+            $connection->on('data', function ($chunk) use ($connection) {
+                // Identify the target email domain from the TCP data
+                $targetEmailDomain = preg_replace('/^get /i', '', trim($chunk));
+
+                // Validate the email address domain via Oempro
+                try {
+                    $httpClient = new GuzzleHttp\Client();
+                    $httpResponse = $httpClient->request('GET', Config::$oemproUrl . 'api/v1/inbound-relay-domain-check?domain=' . $targetEmailDomain, [
+                        'headers' => [
+                            'Authorization' => 'Bearer ' . Config::$oemproAdminApiKey,
+                            'Accept' => 'application/json',
+                        ],
+                    ]);
+
+                    if ($httpResponse->getStatusCode() == 200) {
+                        $connection->write("200 " . Config::$aliasUsername . "\n");
+                    }
+                } catch (Exception $e) {
+                    // A problem has occurred when trying to make a check on Oempro
+                    if ($e->getResponse()) {
+                        $response = $e->getResponse();
+
+                        if ($response->getStatusCode() >= 400 && $response->getStatusCode() <= 499) {
+                            $connection->write("400 Temporary error has occurred\n");
+                        } elseif ($response->getStatusCode() >= 500 && $response->getStatusCode() <= 599) {
+                            $connection->write("500 Relay access denied\n");
+                        }
+                    } else {
+                        $connection->write("400 Temporary error has occurred\n");
+                    }
+                }
+
+                $connection->end();
+            });
+
+            // Event: Connection ended
+            $connection->on('end', function () {
+            });
+
+            // Event: Error occurred
+            $connection->on('error', function () {
+            });
+
+            // Event: Connection closed
+            $connection->on('close', function () {
+            });
+        });
+
+        // What to do if an error occurs during the connection
+        $socket->on('error', function (Exception $e) {
+            echo 'Error: ' . $e->getMessage() . PHP_EOL;
+        });
+    }
+}
+
+// Run the server
+$server = new Server();
+$server->run();
