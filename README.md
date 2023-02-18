@@ -9,7 +9,46 @@ This module contains;
 - Supervisor
 - PHP
 
-## Installation Instructions
+## Production Server Installation Instructions
+
+```shell
+apt update
+apt install -y software-properties-common sharutils apt-utils iputils-ping telnet git unzip zip openssl vim wget debconf-utils cron supervisor mysql-client docker.io ufw make
+curl -L "https://github.com/docker/compose/releases/download/v2.15.1/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+mkdir /opt/oempro-mx-server
+cd /opt/oempro-mx-server
+git clone https://github.com/octeth/oempro-mx-server.git .
+cp .env_example .env
+cd alias-server/
+cp .env_example .env
+```
+
+Set `.env` file configurations.
+
+```shell
+make build
+make run
+```
+
+Edit the Postfix `main.cf` and change the `myhostname` parameter:
+
+```shell
+vi /opt/oempro-mx-server/docker-data/etc-postfix/main.cf
+```
+
+Once the Postfix configuration change is made, restart the container:
+
+```shell
+cd /opt/oempro-mx-server/
+make kill
+make run
+```
+
+> Make sure that Postfix `myhostname` value, server IP address PTR domain, and domain IP address match.
+
+## Local Development Installation Instructions
 
 Copy `.env_example` to `.env` and set the configuration. 
 
@@ -42,7 +81,7 @@ When an async bounce occurs, the recipient MX server sends a delivery status not
 3. The received email will be stored inside `catchall` user mailbox file.
 4. Oempro will connect to Dovecot, authenticate as `catchall` user and fetch emails from the mailbox for bounce processing.
 
-## Accessing the IMAP mailbox
+## Accessing the IMAP Mailbox
 
 You can access the IMAP mailbox by any third party IMAP email client.
 
@@ -52,7 +91,7 @@ In addition to this, you can also use the built-in RoundCube Email Client to acc
 
 Simply visit `http://<server_ip_address>:8000` on your web browser. Enter the `catchall` username and the password written in the `.env` file.
 
-## How to enable TLS
+## How To Enable TLS
 
 First, edit `docker-data/etc-postfix/main.cf` file:
 
@@ -129,6 +168,20 @@ verify return:1
 ```
 
 That's it.
+
+## Deploy To Docker Hub
+
+```shell
+make build
+make run
+docker commit -m 'Deploy commit' -a "Cem Hurturk" oempro-mx-server octeth/octeth_mx_server:v1.0.0
+docker login -u cemhurturk
+docker push octeth/octeth_mx_server:v1.0.0
+```
+
+> After `docker login`, enter the password you have set. [Check this kb article](https://www.notion.so/chmyos/Updating-Oempro-Docker-Container-cd62f83e5d054969bae57a51f25b0e91?pvs=4) for the password.
+
+
 
 ## Directory Structure
 

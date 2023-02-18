@@ -28,6 +28,9 @@ RUN echo root:${root_password} | chpasswd
 RUN useradd -ms /bin/bash catchall
 RUN echo catchall:${catchall_password} | chpasswd
 
+# Add the alias-server code base to the image
+ADD alias-server /opt/alias-server
+
 # Entrypoint setup
 ADD entrypoint.sh /entrypoint.sh
 RUN chmod 0755 /entrypoint.sh

@@ -2,13 +2,14 @@ include .env
 export $(shell sed 's/=.*//' .env)
 
 build:
-	docker build --no-cache -t oempro-mx-server --build-arg root_password=${root_password} --build-arg catchall_password=${catchall_password} .
+	docker build --platform=linux/amd64 --no-cache -t oempro-mx-server --build-arg root_password=${root_password} --build-arg catchall_password=${catchall_password} .
 
 run:
 	-@docker rm oempro-mx-server
+
+	# Add this to mount the codebase '-v ${PWD}/alias-server:/opt/alias-server \'
 	@docker run -d -it --rm \
 	-v ${PWD}/docker-data/supervisor-processes.conf:/etc/supervisor/conf.d/processes.conf \
-	-v ${PWD}/alias-server:/opt/alias-server \
 	-v ${PWD}/docker-data/var-mail:/var/mail \
 	-v ${PWD}/docker-data/etc-postfix:/etc/postfix \
 	-v ${PWD}/docker-data/etc-dovecot:/etc/dovecot \
