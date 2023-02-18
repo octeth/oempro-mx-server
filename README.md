@@ -46,7 +46,13 @@ make kill
 make run
 ```
 
-> Make sure that Postfix `myhostname` value, server IP address PTR domain, and domain IP address match.
+## IP Address and Domain Setup
+
+Let's assume `192.168.0.100` is your server IP address and you will use `mx.mydomain.com` as MX domain.
+
+- Make sure you set the PTR of `192.168.0.100` to `mx.mydomain.com`
+- Make sure you set A record for `mx.mydomain.com` pointing to `192.168.0.100`
+- Make sure you edit `/opt/oempro-mx-server/docker-data/etc-postfix/main.cf` and set the value of `myhostname` to `mx.mydomain.com`
 
 ## Local Development Installation Instructions
 
