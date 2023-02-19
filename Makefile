@@ -13,7 +13,7 @@ run:
 
 	-@docker network create --subnet=172.19.0.0/16 oempro-mx-server-network
 
-	# Add this to mount the codebase '-v ${PWD}/alias-server:/opt/alias-server \'
+	# Add this to mount the codebase '-v ${PWD}/alias-server:/opt/alias-server \' to enable debug mode
 	@docker run -d -it --rm \
 	-v ${PWD}/docker-data/supervisor-processes.conf:/etc/supervisor/conf.d/processes.conf \
 	-v ${PWD}/docker-data/var-mail:/var/mail \

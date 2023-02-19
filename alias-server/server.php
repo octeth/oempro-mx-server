@@ -61,35 +61,40 @@ class Server
                 // Identify the target email domain from the TCP data
                 $targetEmailDomain = preg_replace('/^get /i', '', trim($chunk));
 
-                // Validate the email address domain via Oempro
-                try {
-                    $httpClient = new GuzzleHttp\Client();
-                    $httpResponse = $httpClient->request('GET', Config::$oemproUrl . 'api/v1/inbound-relay-domain-check?domain=' . $targetEmailDomain, [
-                        'headers' => [
-                            'Authorization' => 'Bearer ' . Config::$oemproAdminApiKey,
-                            'Accept' => 'application/json',
-                        ],
-                    ]);
+                $cachedData = $redisClient->get($targetEmailDomain);
+                if (!is_null($cachedData) && $cachedData > 0) {
+                    $connection->write($cachedData . " Cached Response\n");
+                } else {
+                    // Validate the email address domain via Oempro
+                    try {
+                        $httpClient = new GuzzleHttp\Client();
+                        $httpResponse = $httpClient->request('GET', Config::$oemproUrl . 'api/v1/inbound-relay-domain-check?domain=' . $targetEmailDomain, [
+                            'headers' => [
+                                'Authorization' => 'Bearer ' . Config::$oemproAdminApiKey,
+                                'Accept' => 'application/json',
+                            ],
+                        ]);
 
-                    if ($httpResponse->getStatusCode() == 200) {
-                        $redisClient->set($targetEmailDomain, 200, 'EX', 60);
-                        $connection->write("200 " . Config::$aliasUsername . "\n");
-                    }
-                } catch (Exception $e) {
-                    // A problem has occurred when trying to make a check on Oempro
-                    if ($e->getResponse()) {
-                        $response = $e->getResponse();
+                        if ($httpResponse->getStatusCode() == 200) {
+                            $redisClient->set($targetEmailDomain, 200, 'EX', 60);
+                            $connection->write("200 " . Config::$aliasUsername . "\n");
+                        }
+                    } catch (Exception $e) {
+                        // A problem has occurred when trying to make a check on Oempro
+                        if ($e->getResponse()) {
+                            $response = $e->getResponse();
 
-                        if ($response->getStatusCode() >= 400 && $response->getStatusCode() <= 499) {
+                            if ($response->getStatusCode() >= 400 && $response->getStatusCode() <= 499) {
+                                $redisClient->set($targetEmailDomain, 400, 'EX', 60);
+                                $connection->write("400 Temporary error has occurred\n");
+                            } elseif ($response->getStatusCode() >= 500 && $response->getStatusCode() <= 599) {
+                                $redisClient->set($targetEmailDomain, 500, 'EX', 60);
+                                $connection->write("500 Relay access denied\n");
+                            }
+                        } else {
                             $redisClient->set($targetEmailDomain, 400, 'EX', 60);
                             $connection->write("400 Temporary error has occurred\n");
-                        } elseif ($response->getStatusCode() >= 500 && $response->getStatusCode() <= 599) {
-                            $redisClient->set($targetEmailDomain, 500, 'EX', 60);
-                            $connection->write("500 Relay access denied\n");
                         }
-                    } else {
-                        $redisClient->set($targetEmailDomain, 400, 'EX', 60);
-                        $connection->write("400 Temporary error has occurred\n");
                     }
                 }
 
