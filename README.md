@@ -38,6 +38,14 @@ Edit the Postfix `main.cf` and change the `myhostname` parameter:
 vi /opt/oempro-mx-server/docker-data/etc-postfix/main.cf
 ```
 
+Update directory and file permissions:
+
+```shell
+touch /opt/oempro-mx-server/docker-data/var-mail/catchall
+chmod 0777 /opt/oempro-mx-server/docker-data/var-mail
+chmod 0777 /opt/oempro-mx-server/docker-data/var-mail/catchall
+```
+
 Once the Postfix configuration change is made, restart the container:
 
 ```shell
