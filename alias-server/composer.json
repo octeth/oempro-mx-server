@@ -1,6 +1,7 @@
 {
     "require": {
         "react/socket": "^1.12.0",
-        "guzzlehttp/guzzle": "^7.5"
+        "guzzlehttp/guzzle": "^7.5",
+        "predis/predis": "^2.1"
     }
 }

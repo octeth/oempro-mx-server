@@ -8,6 +8,8 @@ class Config
     public static $oemproUrl = null;
     public static $oemproAdminApiKey = null;
     public static $aliasUsername = 'catchall';
+    public static $redisHost = null;
+    public static $redisPort = 6379;
 }
 
 // Server class
@@ -28,6 +30,14 @@ class Server
         if (isset($iniConfig['oempro_admin_api_key'])) {
             Config::$oemproAdminApiKey = $iniConfig['oempro_admin_api_key'];
         }
+
+        if (isset($iniConfig['redis_host'])) {
+            Config::$redisHost = $iniConfig['redis_host'];
+        }
+
+        if (isset($iniConfig['redis_port'])) {
+            Config::$redisPort = $iniConfig['redis_port'];
+        }
     }
 
     public function run()
@@ -35,13 +45,19 @@ class Server
         // Configuration initialization
         $this->initConfig();;
 
+        $redisClient = new Predis\Client([
+            'scheme' => 'tcp',
+            'host' => Config::$redisHost,
+            'port' => Config::$redisPort,
+        ]);
+
         // Set up the server
         $socket = new React\Socket\SocketServer('127.0.0.1:8000', []);
 
         // Event: Connection is made
-        $socket->on('connection', function (React\Socket\ConnectionInterface $connection) {
+        $socket->on('connection', function (React\Socket\ConnectionInterface $connection) use ($redisClient) {
             // Event: Data is received
-            $connection->on('data', function ($chunk) use ($connection) {
+            $connection->on('data', function ($chunk) use ($connection, $redisClient) {
                 // Identify the target email domain from the TCP data
                 $targetEmailDomain = preg_replace('/^get /i', '', trim($chunk));
 
@@ -56,6 +72,7 @@ class Server
                     ]);
 
                     if ($httpResponse->getStatusCode() == 200) {
+                        $redisClient->set($targetEmailDomain, 200, 'EX', 60);
                         $connection->write("200 " . Config::$aliasUsername . "\n");
                     }
                 } catch (Exception $e) {
@@ -64,11 +81,14 @@ class Server
                         $response = $e->getResponse();
 
                         if ($response->getStatusCode() >= 400 && $response->getStatusCode() <= 499) {
+                            $redisClient->set($targetEmailDomain, 400, 'EX', 60);
                             $connection->write("400 Temporary error has occurred\n");
                         } elseif ($response->getStatusCode() >= 500 && $response->getStatusCode() <= 599) {
+                            $redisClient->set($targetEmailDomain, 500, 'EX', 60);
                             $connection->write("500 Relay access denied\n");
                         }
                     } else {
+                        $redisClient->set($targetEmailDomain, 400, 'EX', 60);
                         $connection->write("400 Temporary error has occurred\n");
                     }
                 }
