@@ -61,9 +61,14 @@ class Server
                 // Identify the target email domain from the TCP data
                 $targetEmailDomain = preg_replace('/^get /i', '', trim($chunk));
 
+                // Check if the target email domain exists in the cache
                 $cachedData = $redisClient->get($targetEmailDomain);
                 if (!is_null($cachedData) && $cachedData > 0) {
-                    $connection->write($cachedData . " Cached Response\n");
+                    if ($cachedData == 200) {
+                        $connection->write("200 " . Config::$aliasUsername . "\n");
+                    } else {
+                        $connection->write($cachedData . " cached_response\n");
+                    }
                 } else {
                     // Validate the email address domain via Oempro
                     try {
@@ -86,19 +91,19 @@ class Server
 
                             if ($response->getStatusCode() >= 400 && $response->getStatusCode() <= 499) {
                                 $redisClient->set($targetEmailDomain, 400, 'EX', 60);
-                                $connection->write("400 Temporary error has occurred\n");
+                                $connection->write("400 temporary_error_has_occurred\n");
                             } elseif ($response->getStatusCode() >= 500 && $response->getStatusCode() <= 599) {
                                 $redisClient->set($targetEmailDomain, 500, 'EX', 60);
-                                $connection->write("500 Relay access denied\n");
+                                $connection->write("500 relay_access_denied\n");
                             }
                         } else {
                             $redisClient->set($targetEmailDomain, 400, 'EX', 60);
-                            $connection->write("400 Temporary error has occurred\n");
+                            $connection->write("400 temporary_error_has_occurred\n");
                         }
                     }
                 }
 
-                $connection->end();
+//                $connection->end();
             });
 
             // Event: Connection ended
