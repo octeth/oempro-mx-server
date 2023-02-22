@@ -30,7 +30,6 @@ class ComposerStaticInitd288f9b887d8eb957b7c83ddd17adfa6
         array (
             'Psr\\Http\\Message\\' => 17,
             'Psr\\Http\\Client\\' => 16,
-            'Predis\\' => 7,
         ),
         'G' => 
         array (
@@ -77,10 +76,6 @@ class ComposerStaticInitd288f9b887d8eb957b7c83ddd17adfa6
         'Psr\\Http\\Client\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-client/src',
-        ),
-        'Predis\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/predis/predis/src',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (

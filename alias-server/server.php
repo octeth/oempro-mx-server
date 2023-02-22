@@ -45,11 +45,9 @@ class Server
         // Configuration initialization
         $this->initConfig();;
 
-        $redisClient = new Predis\Client([
-            'scheme' => 'tcp',
-            'host' => Config::$redisHost,
-            'port' => Config::$redisPort,
-        ]);
+        $redisClient = new Redis();
+        $redisClient->connect(Config::$redisHost, Config::$redisPort);
+        // $redisClient->auth('xxx');
 
         // Set up the server
         $socket = new React\Socket\SocketServer('127.0.0.1:8000', []);

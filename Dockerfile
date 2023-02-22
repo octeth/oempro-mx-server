@@ -13,7 +13,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Install packages
 RUN apt update
 RUN apt install -y postfix-pcre
-RUN apt install -y php php-zip dovecot-imapd dovecot-pop3d telnet supervisor git
+RUN apt install -y php php-redis php-zip dovecot-imapd dovecot-pop3d telnet supervisor git
 
 # Install Composer
 WORKDIR /root/
