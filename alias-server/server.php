@@ -79,7 +79,7 @@ class Server
                         ]);
 
                         if ($httpResponse->getStatusCode() == 200) {
-                            $redisClient->set($targetEmailDomain, 200, 'EX', 60);
+                            $redisClient->set($targetEmailDomain, 200, 60);
                             $connection->write("200 " . Config::$aliasUsername . "\n");
                         }
                     } catch (Exception $e) {
@@ -88,14 +88,14 @@ class Server
                             $response = $e->getResponse();
 
                             if ($response->getStatusCode() >= 400 && $response->getStatusCode() <= 499) {
-                                $redisClient->set($targetEmailDomain, 400, 'EX', 60);
+                                $redisClient->set($targetEmailDomain, 400, 60);
                                 $connection->write("400 temporary_error_has_occurred\n");
                             } elseif ($response->getStatusCode() >= 500 && $response->getStatusCode() <= 599) {
-                                $redisClient->set($targetEmailDomain, 500, 'EX', 60);
+                                $redisClient->set($targetEmailDomain, 500, 60);
                                 $connection->write("500 relay_access_denied\n");
                             }
                         } else {
-                            $redisClient->set($targetEmailDomain, 400, 'EX', 60);
+                            $redisClient->set($targetEmailDomain, 400, 60);
                             $connection->write("400 temporary_error_has_occurred\n");
                         }
                     }
