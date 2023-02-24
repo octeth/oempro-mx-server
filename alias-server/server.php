@@ -45,10 +45,6 @@ class Server
         // Configuration initialization
         $this->initConfig();;
 
-        $redisClient = new Redis();
-        $redisClient->connect(Config::$redisHost, Config::$redisPort);
-        // $redisClient->auth('xxx');
-
         // Set up the server
         $socket = new React\Socket\SocketServer('127.0.0.1:8000', []);
 
@@ -56,6 +52,11 @@ class Server
         $socket->on('connection', function (React\Socket\ConnectionInterface $connection) use ($redisClient) {
             // Event: Data is received
             $connection->on('data', function ($chunk) use ($connection, $redisClient) {
+                // Connect to Redis server
+                $redisClient = new Redis();
+                $redisClient->connect(Config::$redisHost, Config::$redisPort);
+                // $redisClient->auth('xxx');
+
                 // Identify the target email domain from the TCP data
                 $targetEmailDomain = preg_replace('/^get /i', '', trim($chunk));
 
