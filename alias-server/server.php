@@ -49,7 +49,7 @@ class Server
         $socket = new React\Socket\SocketServer('127.0.0.1:8000', []);
 
         // Event: Connection is made
-        $socket->on('connection', function (React\Socket\ConnectionInterface $connection) use ($redisClient) {
+        $socket->on('connection', function (React\Socket\ConnectionInterface $connection) {
             // Event: Data is received
             $connection->on('data', function ($chunk) use ($connection, $redisClient) {
                 // Connect to Redis server
