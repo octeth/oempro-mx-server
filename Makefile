@@ -46,7 +46,7 @@ run:
 	-h oempro-mx-server-redis \
 	--network oempro-mx-server-network --ip 172.19.0.12 \
 	--name oempro-mx-server-redis \
-	redis:latest
+	redis:alpine
 
 stop:
 	-@docker stop oempro-mx-server
