@@ -1,4 +1,5 @@
 .idea
 .env
 docker-data/var-mail/*
+docker-data/catchall-imap/*
 docker-data/redis-data/*

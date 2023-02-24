@@ -17,6 +17,7 @@ run:
 	@docker run -d -it --rm \
 	-v ${PWD}/docker-data/supervisor-processes.conf:/etc/supervisor/conf.d/processes.conf \
 	-v ${PWD}/docker-data/var-mail:/var/mail \
+	-v ${PWD}/docker-data/catchall-imap:/home/catchall/mail \
 	-v ${PWD}/docker-data/etc-postfix:/etc/postfix \
 	-v ${PWD}/docker-data/etc-dovecot:/etc/dovecot \
 	-v ${PWD}/alias-server:/opt/alias-server \
