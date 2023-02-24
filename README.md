@@ -42,8 +42,10 @@ Update directory and file permissions:
 
 ```shell
 touch /opt/oempro-mx-server/docker-data/var-mail/catchall
+chmod 0777 /opt/oempro-mx-server/docker-data/catchall-imap
 chmod 0777 /opt/oempro-mx-server/docker-data/var-mail
 chmod 0777 /opt/oempro-mx-server/docker-data/var-mail/catchall
+chmod 0777 /opt/oempro-mx-server/docker-data/redis-data
 ```
 
 Once the Postfix configuration change is made, restart the container:
