@@ -51,7 +51,7 @@ class Server
         // Event: Connection is made
         $socket->on('connection', function (React\Socket\ConnectionInterface $connection) {
             // Event: Data is received
-            $connection->on('data', function ($chunk) use ($connection, $redisClient) {
+            $connection->on('data', function ($chunk) use ($connection) {
                 // Connect to Redis server
                 $redisClient = new Redis();
                 $redisClient->connect(Config::$redisHost, Config::$redisPort);
@@ -83,7 +83,7 @@ class Server
                             $redisClient->set($targetEmailDomain, 200, 60);
                             $connection->write("200 " . Config::$aliasUsername . "\n");
                         }
-                    } catch (Exception $e) {
+                    } catch (\GuzzleHttp\Exception\RequestException $e) {
                         // A problem has occurred when trying to make a check on Oempro
                         if ($e->getResponse()) {
                             $response = $e->getResponse();
