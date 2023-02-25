@@ -42,12 +42,13 @@ run:
 
 	@docker run -d -it --rm \
 	-v ${PWD}/docker-data/redis-data:/data \
+	-v ${PWD}/docker-data/redis.conf:/usr/local/etc/redis/redis.conf \
 	-p 6379:6379 \
 	--add-host=host.docker.internal:host-gateway \
 	-h oempro-mx-server-redis \
 	--network oempro-mx-server-network --ip 172.19.0.12 \
 	--name oempro-mx-server-redis \
-	redis:7.0.8-alpine3.17
+	redis:7.0.8-alpine3.17 redis-server /usr/local/etc/redis/redis.conf
 
 stop:
 	-@docker stop oempro-mx-server
