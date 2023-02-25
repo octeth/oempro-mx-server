@@ -9,7 +9,7 @@ This module contains;
 - Supervisor
 - PHP
 
-## Production Server Installation Instructions
+## Production Server Installation
 
 ```shell
 apt update
