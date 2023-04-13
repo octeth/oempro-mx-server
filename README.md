@@ -77,6 +77,7 @@ docker exec -ti oempro-mx-server bash
 cd /tmp/
 mkdir ssl
 cd ssl
+apt update
 apt install wget
 apt install certbot
 wget https://github.com/joohoi/acme-dns-certbot-joohoi/raw/master/acme-dns-auth.py .
