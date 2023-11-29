@@ -126,7 +126,7 @@ make run
 In order to test and validate TLS, connect to your MX server by running this command:
 
 ```shell
-openssl s_client -quiet -starttls smtp -connect locahost:25
+openssl s_client -quiet -starttls smtp -connect localhost:25
 ```
 
 and you should see the TLS validation in the beginning:
